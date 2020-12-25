@@ -6,7 +6,7 @@
             <div class="alert alert-success" role="alert" style="margin-top: 10px;">
                 Search Result for: <b>{{ anime }}</b>
             </div>
-            {% for site, results in data.items() %}
+            {% for site, results in data.items()|sort %}
                 <table class="table table-dark table-hover table-bordered table-striped" style="margin-top: 10px;">
                     <thead style="margin: 10px;">
                         <tr><th class="text-center" scope="row" colspan="2">{{ site[:site.rfind('.')]|upper }}</th></tr>
