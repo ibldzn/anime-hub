@@ -10,7 +10,7 @@ app = Flask(__name__)
 sites = [
     "samehadaku.vip",
     "meownime.moe",
-    "oploverz.in",
+    # "oploverz.in";does not work if request was made outside of Indonesia (probably Asia, I haven't really tested it)
     "drivenime.com",
     "awsubs.co",
     "animeindo.video",
