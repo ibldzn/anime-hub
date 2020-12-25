@@ -21,10 +21,10 @@ sites = [
 
 @app.errorhandler(Exception)
 def on_error(exception):
-    if exception is werkzeug.exceptions.BadRequestKeyError:
+    if isinstance(exception, werkzeug.exceptions.BadRequestKeyError):
         error_msg = "400 Bad Request: The server did not understand the request."
         status_code = 400
-    elif exception is werkzeug.exceptions.NotFound:
+    elif isinstance(exception, werkzeug.exceptions.NotFound):
         error_msg = "404 Not Found: The requested URL was not found on the server."
         status_code = 404
     else:
