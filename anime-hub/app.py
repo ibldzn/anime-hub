@@ -31,7 +31,7 @@ def on_error(exception):
         error_msg = "500 Internal Server Error: The request was not completed. Please try again."
         status_code = 500
 
-    return render_template("error.html", error_msg=error_msg, status_code=status_code)
+    return render_template("error.html", error_msg=error_msg, status_code=status_code), status_code
 
 
 @app.route("/search")
@@ -62,12 +62,14 @@ def search():
                     "url": result["url"]
                 })
 
-    return render_template("results.html", data=dict(
-                                                    sorted(
-                                                        data.items(),
-                                                        key=lambda x: (x[1][0]["title"], len(x[1][0]["title"]))
-                                                    )
-                                                ), anime=anime)
+    return render_template("results.html",
+                           data=dict(
+                                sorted(
+                                    data.items(),
+                                    key=lambda x: (x[1][0]["title"], len(x[1][0]["title"]))
+                                )
+                           ),
+                           anime=anime)
 
 
 @app.route('/')
