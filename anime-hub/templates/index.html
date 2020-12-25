@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container-fluid">
+        <form action="{{ url_for('search') }}" method="get">
+            <div class="form-group" style="margin-top: 10px;">
+                <input type="text" class="form-control" id="anime" name="anime" required placeholder="Anime title">
+                <small id="search-anime-tip" class="form-text text-muted">Search the anime you want to find</small>
+            </div>
+            <div class="form-group">
+                <select name="sources" class="selectpicker" data-width="100%" data-selected-text-format="count" data-live-search="true" data-actions-box="true" multiple>
+                    {% for site in sites|sort %}
+                        <option value="{{ site }}">{{ site[:site.rfind('.')]|upper }}</option>
+                    {% endfor %}
+                </select>
+                <small id="select-source-tip" class="form-text text-muted">Leave blank to search from all available sources</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+{% endblock %}

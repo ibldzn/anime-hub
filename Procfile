@@ -1,0 +1,1 @@
+web: sh -c 'cd anime-hub && gunicorn app:app'
