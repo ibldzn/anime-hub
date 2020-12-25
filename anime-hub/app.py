@@ -19,19 +19,19 @@ sites = [
 ]
 
 
-@app.errorhandler(werkzeug.exceptions.BadRequestKeyError)
-def error_bad_request(exception):
-    return render_template("error.html", error_msg="400 Bad Request: The server did not understand the request."), 400
-
-
-@app.errorhandler(werkzeug.exceptions.NotFound)
-def error_not_found(exception):
-    return render_template("error.html", error_msg="404 Not Found: The requested URL was not found on the server."), 404
-
-
 @app.errorhandler(Exception)
-def error_search(exception):
-    return render_template("error.html", error_msg="500 Internal Server Error: The request was not completed. Please try again."), 500
+def on_error(exception):
+    if exception is werkzeug.exceptions.BadRequestKeyError:
+        error_msg = "400 Bad Request: The server did not understand the request."
+        status_code = 400
+    elif exception is werkzeug.exceptions.NotFound:
+        error_msg = "404 Not Found: The requested URL was not found on the server."
+        status_code = 404
+    else:
+        error_msg = "500 Internal Server Error: The request was not completed. Please try again."
+        status_code = 500
+
+    return render_template("error.html", error_msg=error_msg, status_code=status_code)
 
 
 @app.route("/search")
@@ -62,7 +62,12 @@ def search():
                     "url": result["url"]
                 })
 
-    return render_template("results.html", data=data, anime=anime)
+    return render_template("results.html", data=dict(
+                                                    sorted(
+                                                        data.items(),
+                                                        key=lambda x: (x[1][0]["title"], len(x[1][0]["title"]))
+                                                    )
+                                                ), anime=anime)
 
 
 @app.route('/')
