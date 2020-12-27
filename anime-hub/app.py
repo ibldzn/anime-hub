@@ -19,26 +19,19 @@ sites = [
 ]
 
 
-@app.errorhandler(Exception)
-def on_error(exception):
-    if isinstance(exception, werkzeug.exceptions.BadRequestKeyError):
-        error_msg = "400 Bad Request: The server did not understand the request."
-        status_code = 400
-    elif isinstance(exception, werkzeug.exceptions.NotFound):
-        error_msg = "404 Not Found: The requested URL was not found on the server."
-        status_code = 404
-    else:
-        error_msg = "500 Internal Server Error: The request was not completed. Please try again."
-        status_code = 500
-
-    return render_template("error.html", error_msg=error_msg, status_code=status_code), status_code
+@app.errorhandler(werkzeug.exceptions.HTTPException)
+def on_error(exception: werkzeug.exceptions.HTTPException):
+    return render_template("error.html", error_msg=f"Status code {exception.code}: {exception.description}"), exception.code
 
 
 @app.route("/search")
 def search():
     anime = request.args["anime"]
+    if not anime:
+        return render_template("error.html", error_msg="Status code 400: `anime` parameter cannot be empty!"), 400
+
     sources = request.args.getlist("sources")
-    if len(sources) == 0:
+    if not sources:
         sources = sites
 
     data = defaultdict(list)
