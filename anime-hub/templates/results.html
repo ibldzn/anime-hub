@@ -6,29 +6,30 @@
             <div class="alert alert-success" role="alert" style="margin-top: 10px;">
                 Search result for <b>{{ anime }}</b>
             </div>
-            {% for site, results in data.items()|sort %}
-                <table class="table table-dark table-hover table-bordered table-striped" style="margin-top: 10px;">
-                    <thead style="margin: 10px;">
-                        <tr><th class="text-center" scope="row" colspan="2">{{ site[:site.rfind('.')]|upper }}</th></tr>
-                        <tr>
-                            <th class="text-center" scope="row" width="50%">Title</th>
-                            <th class="text-center" scope="row" width="50%">Download</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <table class="table table-dark table-hover table-bordered table-striped" id="result-table" style="margin-top: 10px;">
+                <thead style="margin: 10px;">
+                    <tr>
+                        <th class="text-center" scope="row" width="70%">Title</th>
+                        <th class="text-center" scope="row" width="20%">Source</th>
+                        <th class="text-center" scope="row" width="10%" data-sortas="disable">Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for site, results in data.items()|sort %}
                         {% for result in results %}
                             <tr>
                                 <td scope="col">{{ result.title }}</td>
-                                <td scope="col">
+                                <td scope="col">{{ site[:site.rfind('.')]|upper }}</td>
+                                <td scope="col" class="text-center">
                                     <a href="{{ result.url }}" target="_blank">
-                                        <button class="btn" style="width:100%"><i class="fa fa-download"></i> Download</button>
+                                        <i class="fa fa-download"></i> Download
                                     </a>
                                 </td>
                             </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
-            {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
         {% else %}
             <div class="alert alert-danger" role="alert" style="margin-top: 10px;">
                 Unable to find <b>{{ anime }}</b>
@@ -36,4 +37,20 @@
             <a href="/"><button class="btn btn-primary"><i class="fa fa-home"></i> Home</button></a>
         {% endif %}
     </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='js/fancyTable.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $('#result-table').fancyTable({
+                globalSearch: true,
+                pagination: true,
+                paginationClass: "btn btn-dark",
+                perPage: 15,
+                searchable: true,
+                sortAs: ["case-insensitive"],
+            });
+        } );
+    </script>
 {% endblock %}

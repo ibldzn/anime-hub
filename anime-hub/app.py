@@ -1,10 +1,12 @@
-import requests
+import httpx
+import asyncio
 import html.parser
 import werkzeug.exceptions
 from collections import defaultdict
 from flask import Flask, render_template, request
 
 
+loop = asyncio.get_event_loop()
 app = Flask(__name__)
 
 sites = [
@@ -24,6 +26,39 @@ def on_error(exception: werkzeug.exceptions.HTTPException):
     return render_template("error.html", error_msg=f"Status code {exception.code}: {exception.description}"), exception.code
 
 
+async def download_results(site: str, params: dict):
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:84.0) Gecko/20100101 Firefox/84.0"}
+    async with httpx.AsyncClient(headers=headers) as client:
+        response = await client.get(f"https://{site}/wp-json/wp/v2/search", params=params)
+        return {site: response.json()} if not response.is_error else None
+
+        """
+        # this is better if request was sent from the client.
+        ret = list()
+        cnt = 0  # request counter
+
+        while True:
+            if (cnt + 1) % 2 == 0:
+                await asyncio.sleep(2)  # prevent flooding the server to avoid IP Ban
+            
+            response = await client.get(f"https://{site}/wp-json/wp/v2/search", params=params)
+            cnt += 1
+            data = response.json()
+
+            if response.is_error or not data:
+                break
+
+            ret.extend(data)
+            params["page"] += 1
+        
+        return {site: ret}
+        """
+
+
+async def get_search_results(sources: list, params: dict):
+    return await asyncio.gather(*[download_results(source, params) for source in sources])
+
+
 @app.route("/search")
 def search():
     anime = request.args["anime"]
@@ -35,25 +70,30 @@ def search():
         sources = sites
 
     data = defaultdict(list)
-    with requests.Session() as session:
-        session.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:84.0) Gecko/20100101 Firefox/84.0"
-        params = {
+
+    params = {
             "search": anime,
-            "per_page": 100
+            "per_page": 100,
+            "page": 1
         }
+    search_results = loop.run_until_complete(get_search_results(sources, params))
 
-        for site in sources:
-            r = session.get(f"https://{site}/wp-json/wp/v2/search", params=params)
-            if not r.ok:
-                continue
-
-            results = r.json()
-
+    for search_result in search_results:
+        for site, results in search_result.items():
+            for result in results:
+                data[site].append({
+                        "title": html.parser.unescape(result["title"]),
+                        "url": result["url"]
+                    })  
+    """
+    for search_result in search_results:
+        for site, results in search_result.items():
             for result in results:
                 data[site].append({
                     "title": html.parser.unescape(result["title"]),
                     "url": result["url"]
-                })
+                })  
+    """
 
     return render_template("results.html",
                            data=dict(
@@ -71,4 +111,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=1)
