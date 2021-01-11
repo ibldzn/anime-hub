@@ -85,15 +85,6 @@ def search():
                         "title": html.parser.unescape(result["title"]),
                         "url": result["url"]
                     })  
-    """
-    for search_result in search_results:
-        for site, results in search_result.items():
-            for result in results:
-                data[site].append({
-                    "title": html.parser.unescape(result["title"]),
-                    "url": result["url"]
-                })  
-    """
 
     return render_template("results.html",
                            data=dict(
@@ -111,4 +102,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=1)
+    app.run()
