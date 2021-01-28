@@ -14,7 +14,7 @@ sites = [
     "meownime.moe",
     # "oploverz.in";does not work if request was made outside of Indonesia (probably Asia, I haven't really tested it)
     "drivenime.com",
-    "awsubs.co",
+    # "awsubs.co", ; dead.
     "animeindo.video",
     "nekonime.video",
     "nimegami.com",
